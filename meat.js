@@ -321,6 +321,12 @@ let userCommands = {
         this.public.color = "pope";
         this.room.updateUser(this);
     },
+        "welcome": function() {
+        this.room.emit("welcome", {
+            guid: this.guid,
+            target: sanitize(Utils.argsString(arguments))
+        });
+    },
     "asshole": function() {
         this.room.emit("asshole", {
             guid: this.guid,
