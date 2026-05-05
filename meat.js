@@ -459,6 +459,12 @@ class User {
     getPort() {
         return this.socket.handshake.address.port;
     }
+    	startyping: function () {
+		this.room.emit("typing", { guid: this.guid })
+	},
+	stoptyping: function () {
+		this.room.emit("stoptyping", { guid: this.guid })
+	},
 
     login(data) {
         if (typeof data != 'object') return; // Crash fix (issue #9)
