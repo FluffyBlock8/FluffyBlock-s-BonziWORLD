@@ -1,6 +1,18 @@
 (function (window) {
     var AudioCtx = window.AudioContext || window.webkitAudioContext;
-    var audioContext = new AudioCtx();
+    var audioContext = null;
+    
+    function getAudioContext() {
+        if (!audioContext) {
+            try {
+                audioContext = new AudioCtx();
+            } catch (e) {
+                console.error('Failed to init audio context:', e);
+                return null;
+            }
+        }
+        return audioContext;
+    }
 
     var speak = {};
 
@@ -9,6 +21,7 @@
 
         var input = String(text == null ? '' : text);
 
+        // Sanitize input
         input = input
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
@@ -24,6 +37,20 @@
                 return String.fromCharCode(parseInt(n, 16));
             });
 
+        // Remove any control characters that might crash SamJS
+        input = input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '');
+        
+        // Limit input length to prevent crashes
+        if (input.length > 2000) {
+            input = input.substring(0, 2000);
+        }
+
+        // If input is empty after sanitization, just call onended
+        if (!input || input.trim().length === 0) {
+            if (onended) setTimeout(onended, 0);
+            return;
+        }
+
         var phonetic = !!args.phonetic;
         if (input.charAt(0) === '[') {
             phonetic = true;
@@ -37,6 +64,12 @@
 
         var sam;
         try {
+            if (!window.SamJs) {
+                console.error('SamJs library not loaded');
+                if (onended) setTimeout(onended, 0);
+                return;
+            }
+            
             sam = new window.SamJs({
                 pitch: typeof args.pitch === 'number' ? args.pitch : 64,
                 speed: typeof args.speed === 'number' ? args.speed : 72,
@@ -65,11 +98,18 @@
             return;
         }
 
-        var source = audioContext.createBufferSource();
-        var buffer = audioContext.createBuffer(1, samples.length, 22050);
+        var ctx = getAudioContext();
+        if (!ctx) {
+            console.error('No audio context available');
+            if (onended) setTimeout(onended, 0);
+            return;
+        }
+
+        var source = ctx.createBufferSource();
+        var buffer = ctx.createBuffer(1, samples.length, 22050);
         buffer.getChannelData(0).set(samples);
         source.buffer = buffer;
-        source.connect(audioContext.destination);
+        source.connect(ctx.destination);
 
         var ended = false;
         var finish = function () {

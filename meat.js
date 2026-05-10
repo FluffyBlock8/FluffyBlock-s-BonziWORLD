@@ -4,10 +4,32 @@ const Utils = require("./utils.js");
 const io = require('./index.js').io;
 const settings = require("./settings.json");
 const sanitize = require('sanitize-html');
+const fs = require('fs-extra');
+const path = require('path');
 
 let roomsPublic = [];
 let rooms = {};
 let usersAll = [];
+
+// Create logs directory for message logs if it doesn't exist
+const messageLogsDir = path.join(__dirname, 'logs', 'messages');
+fs.ensureDirSync(messageLogsDir);
+
+// Function to log messages to file
+function logMessageToFile(roomId, userName, message, guid) {
+    const timestamp = new Date().toISOString();
+    const logFileName = path.join(messageLogsDir, `${roomId}.log`);
+    const logEntry = `[${timestamp}] ${userName} (${guid}): ${message}\n`;
+    
+    try {
+        fs.appendFileSync(logFileName, logEntry);
+    } catch (e) {
+        log.info.log('warn', 'messageLogFail', {
+            roomId: roomId,
+            error: e
+        });
+    }
+}
 
 function isAllowedImageUrl(url) {
     if (typeof url != "string") return false;
@@ -418,7 +440,73 @@ let userCommands = {
         );
 
         this.room.updateUser(this);
-	}
+	},
+    "voice": function(voiceType) {
+        const validVoices = ["en-us", "en-gb", "es", "fr", "de", "it", "ru", "jp", "default"];
+        voiceType = (voiceType || "en-us").toLowerCase();
+        
+        if (!validVoices.includes(voiceType)) {
+            this.socket.emit('alert', `Invalid voice. Valid voices: ${validVoices.join(', ')}`);
+            return;
+        }
+        
+        this.public.voice = voiceType;
+        this.room.updateUser(this);
+        log.info.log('debug', 'voice_change', {
+            guid: this.guid,
+            voice: voiceType
+        });
+    },
+    "notify": function(msg) {
+        if (typeof msg != "string") {
+            msg = Utils.argsString(arguments);
+        }
+        
+        // Sanitize and limit message
+        msg = sanitize(msg);
+        if (msg.length > 200) {
+            msg = msg.substring(0, 200);
+        }
+        
+        // Emit notification to room
+        this.room.emit("notify", {
+            guid: this.guid,
+            name: this.public.name,
+            msg: msg,
+            timestamp: new Date().toISOString()
+        });
+        
+        log.info.log('debug', 'notification', {
+            guid: this.guid,
+            msg: msg
+        });
+    },
+    "ps4notify": function(msg) {
+        // PS4 specific notification (larger, more prominent)
+        if (typeof msg != "string") {
+            msg = Utils.argsString(arguments);
+        }
+        
+        // Sanitize and limit message for PS4 display
+        msg = sanitize(msg);
+        if (msg.length > 150) {
+            msg = msg.substring(0, 150);
+        }
+        
+        // Emit PS4-style notification to room
+        this.room.emit("ps4notify", {
+            guid: this.guid,
+            name: this.public.name,
+            msg: msg,
+            timestamp: new Date().toISOString(),
+            type: "primary"
+        });
+        
+        log.info.log('debug', 'ps4_notification', {
+            guid: this.guid,
+            msg: msg
+        });
+    }
 };
 
 
@@ -600,6 +688,9 @@ class User {
 
         let text = this.private.sanitize ? sanitize(data.text) : data.text;
         if ((text.length <= this.room.prefs.char_limit) && (text.length > 0)) {
+            // Log message to file
+            logMessageToFile(this.room.rid, this.public.name, text, this.guid);
+            
             this.room.emit('talk', {
                 guid: this.guid,
                 text: text
