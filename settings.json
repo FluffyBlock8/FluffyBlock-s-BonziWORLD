@@ -230,7 +230,9 @@
                 "lbty", 
                 "27", 
                 "y", 
-                "bonzilink"
+                "bonzilink",
+                "stickman",
+                "sprint"
         ],
         "banLength": 1440,
         "port": 80,
