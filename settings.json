@@ -232,7 +232,8 @@
                 "y", 
                 "bonzilink",
                 "stickman",
-                "sprint"
+                "sprint",
+                "fluffyblock"
         ],
         "banLength": 1440,
         "port": 80,
