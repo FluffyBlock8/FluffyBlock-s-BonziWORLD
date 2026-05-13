@@ -297,7 +297,7 @@ let userCommands = {
     "bees": "passthrough",
     "color": function(color) {
         if (typeof color != "undefined") {
-            if (/^https?:\/\//i.test(color)) {
+            if (/^https:\/\//i.test(color)) {
                 if (!isAllowedImageUrl(color)) {
                     this.socket.emit("alert", "Crosscolor URL not on allow-list. Allowed hosts: catbox.moe, ImgBB, Imgur, wiki images.");
                     return;
