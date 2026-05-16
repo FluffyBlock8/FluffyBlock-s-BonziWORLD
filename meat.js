@@ -284,7 +284,7 @@ let userCommands = {
     },
     "announce": function(msg) {
             if(this.private.runlevel<3){
-                this.socket.emit('alert','admin=true')
+                this.socket.emit('alert','god=true')
                 return;
             }
         this.room.emit("announcement", {
