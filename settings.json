@@ -233,7 +233,9 @@
                 "bonzilink",
                 "stickman",
                 "sprint",
-                "fluffyblock"
+                "fluffyblock",
+                "maxalert",
+                "rayman"
         ],
         "banLength": 1440,
         "port": 80,
