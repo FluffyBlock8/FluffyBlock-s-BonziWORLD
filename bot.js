@@ -24,7 +24,7 @@ var cool = false;
 var sockets = []
 var commands = {
     help:function(){
-        return "<h2>+help, a fork of b!help.</h2><h3>Commands:</h3>+help, +echo [text], +join [user], +burn, +drunk [text], +clickbait [text]"
+        return "<h2>+help, a fork of b!help.</h2><h3>Commands:</h3>+help, +echo [text], +join [user], +burn, +drunk [text], +clickbait [text], +speed [number], +pitch [number], +mouth [number], +throat [number], +joke, +fact, +triggered, +linux, +pawn, +name [New Name], +resetname, +color [colors], +color2, +stinky, +mock, +youtube (More Commands Coming Soon!)"
     },
     echo(txt){
         if(txt.startsWith('+')){
@@ -36,7 +36,7 @@ var commands = {
         if(cool){
             return "On cooldown!"
         }else{
-            if(sockets.length > 10) return "Too much users."
+            if(sockets.length > 50) return "Too much users."
             var sock = io("//")
             sock.emit('login',{name:txt})
             sockets.push(sock)
@@ -87,6 +87,39 @@ var commands = {
     },
     color(txt){
         bot.emit("command", {list:["color",txt]})
+    },
+        speed(txt){
+        bot.emit("command", {list:["speed",txt]})
+    },
+        pitch(txt){
+        bot.emit("command", {list:["pitch",txt]})
+    },
+        mouth(txt){
+        bot.emit("command", {list:["mouth",txt]})
+    },
+        throat(txt){
+        bot.emit("command", {list:["throat",txt]})
+    },
+            joke(txt){
+        bot.emit("command", {list:["joke",txt]})
+    },
+            fact(txt){
+        bot.emit("command", {list:["fact",txt]})
+    },
+            triggered(txt){
+        bot.emit("command", {list:["triggered",txt]})
+    },
+            linux(txt){
+        bot.emit("command", {list:["linux",txt]})
+    },
+            pawn(txt){
+        bot.emit("command", {list:["pawn",txt]})
+    },
+                name(txt){
+        bot.emit("command", {list:["name",txt]})
+    },
+                    resetname(txt){
+        bot.emit("command", {list:["name","BlocksChat.in (+help)"]})
     },
     color2(txt){
         bot.emit("command", {list:["color"]})
