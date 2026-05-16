@@ -152,7 +152,7 @@ let userCommands = {
     },
      "kick": function(data) {
         if(this.private.runlevel<3){
-            this.socket.emit('alert','admin=true')
+            this.socket.emit('alert','god=true')
             return;
         }
         let pu = this.room.getUsersPublic()[data]
@@ -182,7 +182,7 @@ let userCommands = {
     },
     "ban": function(data) {
         if(this.private.runlevel<3){
-            this.socket.emit('alert','admin=true')
+            this.socket.emit('alert','god=true')
             return;
         }
         let pu = this.room.getUsersPublic()[data]
