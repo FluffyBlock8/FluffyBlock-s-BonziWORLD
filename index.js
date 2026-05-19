@@ -7,26 +7,35 @@ const fs = require('fs-extra');
 
 // Load settings
 try {
-	stats = fs.lstatSync('settings.json');
+        stats = fs.lstatSync('settings.json');
 } catch (e) {
-	// If settings do not yet exist
-	if (e.code == "ENOENT") {
-		try {
-			fs.copySync(
-				'settings.example.json',
-				'settings.json'
-			);
-			console.log("Created new settings file.");
-		} catch(e) {
-			console.log(e);
-			throw "Could not create new settings file.";
-		}
-	// Else, there was a misc error (permissions?)
-	} else {
-		console.log(e);
-		throw "Could not read 'settings.json'.";
-	}
+        // If settings do not yet exist
+        if (e.code == "ENOENT") {
+                try {
+                        fs.copySync(
+                                'settings.example.json',
+                                'settings.json'
+                        );
+                        console.log("Created new settings file.");
+                } catch(e) {
+                        console.log(e);
+                        throw "Could not create new settings file.";
+                }
+        // Else, there was a misc error (permissions?)
+        } else {
+                console.log(e);
+                throw "Could not read 'settings.json'.";
+        }
 }
+
+// Load settings into memory
+const settings = require("./settings.json");
+// Setup basic express server
+var express = require('express');
+var app = express();
+if (settings.express.serveStatic)
+        app.use(express.static('./build/www'));
+var server = require('http').createServer(app);
 
 // ========================================================================
 // Crosscolor image proxy
@@ -75,15 +84,6 @@ app.get('/proxy-image', function(req, res) {
     });
 });
 
-// Load settings into memory
-const settings = require("./settings.json");
-// Setup basic express server
-var express = require('express');
-var app = express();
-if (settings.express.serveStatic)
-	app.use(express.static('./build/www'));
-var server = require('http').createServer(app);
-
 // Init socket.io
 var io = require('socket.io')(server);
 var port = process.env.PORT || settings.port;
@@ -104,12 +104,12 @@ Ban.init();
 
 // Start actually listening
 server.listen(port, function () {
-	console.log(
-		"\n",
-		"Server domain: localhost\n",
-		"------------------------\n",
-		"Server listening on port: " + port
-	);
+        console.log(
+                "\n",
+                "Server domain: localhost\n",
+                "------------------------\n",
+                "Server listening on port: " + port
+        );
 });
 app.use(express.static(__dirname + '/public'));
 
