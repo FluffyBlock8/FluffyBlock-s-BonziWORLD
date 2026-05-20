@@ -13,7 +13,8 @@ __^^Arle Nadja^^\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0__
 \u00a0\u2022 ${PREFIX}fact
 \u00a0\u2022 ${PREFIX}triggered
 \u00a0\u2022 ${PREFIX}linux
-\u00a0\u2022 ${PREFIX}color`;
+\u00a0\u2022 ${PREFIX}color
+\u00a0\u2022 ${PREFIX}weather`;
 
 const SAMPLE = {
     dog: "https://files.catbox.moe/vqeiu7.webp",
@@ -186,6 +187,11 @@ let cmd = {
         },
         	color() {
 		arle.emit("command", { list: ["color"] })
+        },
+            	weather({ text }) {
+		        const location = text.substring(PREFIX.length + 8);
+        return getWeather(location);
+    },
 	source() {
 		send("-\n^^__SOURCE CODE__^^\nMizar Lite is open source. You can run it yourself, but please change the prefix to something not in use if you're gonna do that in a public room. The code is avaiable here:\nhttps://file.garden/Z2ixc8sGKQRH3KlU/bot.js");
 	}
