@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="stylesheet" type="text/css" href="./css/style.min.css">
+    <link rel="stylesheet" type="text/css" href="./css/animations.css">
     <link rel="apple-touch-icon" sizes="180x180" href="./favicons/apple-touch-icon.png">
     <link rel="icon" type="image/png" href="./favicons/favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="./favicons/favicon-16x16.png" sizes="16x16">
@@ -30,11 +31,20 @@
     <script src="./js/platform.js"></script>
     <script src="./js/ban.js"></script>
     <link rel="stylesheet" type="text/css" href="./css/platform.css">
+    <script src="./js/animations.js"></script>
+    <script src="./js/loader.js"></script>
     <script src="./js/script.min.js"></script>
 
 </head>
 
 <body>
+    <div id="loaderOverlay" class="loader-overlay">
+        <div class="loader-box">
+            <div class="loader-logo"><img src="./img/logon/bonzicircle.png" alt=""></div>
+            <div class="loader-text">Loading assets <span id="loaderPercent">0%</span></div>
+            <div class="loader-bar"><div id="loaderBarFill"></div></div>
+        </div>
+    </div>
     <div id="content">
         <div id="room_info"> Room ID -
             <span class="room_id">???</span>
@@ -44,6 +54,7 @@
             <span id="room_owner"><br>You are the owner of this room.</span>
         </div>
         <canvas id="bonzi_canvas" width="100" height="100"></canvas>
+        <div id="chat_messages"></div>
         <table id="chat_bar">
             <tr>
                 <td id="chat_send">Send</td>

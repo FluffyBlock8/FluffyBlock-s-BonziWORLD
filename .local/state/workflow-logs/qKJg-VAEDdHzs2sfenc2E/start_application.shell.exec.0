@@ -1,0 +1,8 @@
+
+> bonziworld_server@2.0.2 start
+> node index.js
+
+[1G[0K
+ Server domain: localhost
+ ------------------------
+ Server listening on port: 5000
