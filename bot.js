@@ -20,33 +20,11 @@ var reconnected = function(){
     })
     bot.on('reconnected',reconnected)
 }
-function sendMsg(msg) {
-    setTimeout(() => {
-        bot.emit("talk", { text: msg });
-    }, 1000);
-}
-function getWeather(location) {
-    const apiKey = "dcc6b2a3fa3d4fe58d9193316232905";
-    fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(location)}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) return sendMsg("Couldn't find weather info for that location.");
-            const w = data.current;
-            sendMsg(`🌦 Weather in ${data.location.name}, ${data.location.country}\nCondition: ${w.condition.text}\nTemperature: ${w.temp_c}°C\nHumidity: ${w.humidity}%\nWind: ${w.wind_kph} km/h`);
-        })
-        .catch(() => sendMsg("Weather service unavailable right now."));
-}
-setTimeout(() => { bot.emit("command", { list: ["speed", "62"] }) }, 3000);
-setTimeout(() => { bot.emit("command", { list: ["pitch", "54"] }) }, 3000);
-setTimeout(() => { bot.emit("command", { list: ["mouth", "184"] }) }, 3000);
-setTimeout(() => { bot.emit("command", { list: ["throat", "204"] }) }, 3000);
-setTimeout(() => { sendMsg(`BlocksChat.in is online. Type +help to see commands.`); }, 5000);
-
 var cool = false;
 var sockets = []
 var commands = {
     help:function(){
-        return "<h2>+help, a fork of b!help.</h2><h3>Commands:</h3>+help, +echo [text], +join [user], +burn, +drunk [text], +clickbait [text], +speed [number], +pitch [number], +mouth [number], +throat [number], +joke, +fact, +triggered, +linux, +pawn, +bees, +name [NEWNAME], +resetname, +color [colors], +color2, +stinky [NAME], +mock [text], +youtube [URL], +weather [LOCATION], +roominfo, +tts [TEXT], +image [URL], +video [URL] (More Commands Coming Soon!)"
+        return "<h2>+help, a fork of b!help.</h2><h3>Commands:</h3>+help, +echo [text], +join [user], +burn, +drunk [text], +clickbait [text], +speed [number], +pitch [number], +mouth [number], +throat [number], +joke, +fact, +triggered, +linux, +pawn, +name [New Name], +resetname, +color [colors], +color2, +stinky, +mock, +youtube (More Commands Coming Soon!)"
     },
     echo(txt){
         if(txt.startsWith('+')){
@@ -140,32 +118,11 @@ var commands = {
                 name(txt){
         bot.emit("command", {list:["name",txt]})
     },
-                    image(txt){
-        bot.emit("command", {list:["image",txt]})
-    },
-                    video(txt){
-        bot.emit("command", {list:["video",txt]})
-    },
-                        bees(txt){
-        bot.emit("command", {list:["bees",txt]})
-    },
                     resetname(txt){
         bot.emit("command", {list:["name","BlocksChat.in (+help)"]})
     },
     color2(txt){
         bot.emit("command", {list:["color"]})
-    },
-    weather(txt){
-        const location = txt;
-        return getWeather(location);
-    },
-    tts(txt){
-        const ttsText = txt;
-        const audio = new Audio(`https://tts.cyzon.us/tts?text=${encodeURIComponent(ttsText)}`);
-        return audio.play();
-    },
-    roominfo(){
-        return sendMsg("Users in room: " + window.usersAmt);
     },
     clickbait(txt){
         return (["omg!",':O','what?','wtf?!'][Math.floor(Math.random()*4)]+' '+txt+' '+["(gone wrong)",'(gone sexual)','(not clickbait!)','(cops called)', '(GET RCKT)'][Math.floor(Math.random()*4)]+'\u{1F631}'.repeat(Math.ceil(Math.random()*5))).toUpperCase()

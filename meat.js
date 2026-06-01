@@ -418,7 +418,26 @@ let userCommands = {
         );
 
         this.room.updateUser(this);
-	}
+    },
+    "voice": function(voice) {
+        if (voice !== "sam" && voice !== "espeak") {
+            this.socket.emit("alert", "Invalid voice. Use: /voice sam  or  /voice espeak");
+            return;
+        }
+        this.public.voice = voice;
+        if (voice !== "sam") this.public.singmode = false;
+        this.socket.emit("alert", "Voice switched to " + voice + ".");
+        this.room.updateUser(this);
+    },
+    "singmode": function() {
+        if (this.public.voice !== "sam") {
+            this.socket.emit("alert", "singmode is only available with SAM TTS. Use /voice sam first.");
+            return;
+        }
+        this.public.singmode = !this.public.singmode;
+        this.socket.emit("alert", "Singmode " + (this.public.singmode ? "enabled" : "disabled") + ".");
+        this.room.updateUser(this);
+    }
 };
 
 
@@ -559,6 +578,9 @@ class User {
                                 this.room.prefs.throat.max
                         );
                 else this.public.throat = this.room.prefs.throat ? this.room.prefs.throat.default : 128;
+
+                this.public.voice = "sam";
+                this.public.singmode = false;
 
         // Join room
         this.room.join(this);

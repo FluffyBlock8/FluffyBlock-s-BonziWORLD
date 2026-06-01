@@ -2,16 +2,15 @@
     var AudioCtx = window.AudioContext || window.webkitAudioContext;
     var audioContext = new AudioCtx();
 
-    var samWorker = null;
-    var espeakWorker = null;
+    var worker = null;
     var pendingCallbacks = {};
     var requestCounter = 0;
 
-    function getSamWorker() {
-        if (samWorker) return samWorker;
+    function getWorker() {
+        if (worker) return worker;
         try {
-            samWorker = new Worker('./js/lib/speakjs/samWorker.js');
-            samWorker.onmessage = function (e) {
+            worker = new Worker('./js/lib/speakjs/samWorker.js');
+            worker.onmessage = function (e) {
                 var data = e.data;
                 var cb = pendingCallbacks[data.id];
                 if (!cb) return;
@@ -23,58 +22,19 @@
                 }
                 if (cb.handle.cancelled) return;
                 var samples = new Float32Array(data.samples);
-                playFloat32(samples, cb.handle, cb.onended, cb.onstart);
+                playBuffer(samples, cb.handle, cb.onended, cb.onstart);
             };
-            samWorker.onerror = function (e) {
+            worker.onerror = function (e) {
                 console.error('SAM worker error:', e);
             };
         } catch (e) {
-            console.error('Could not create SAM worker:', e);
-            samWorker = null;
+            console.error('Could not create SAM worker, falling back to sync:', e);
+            worker = null;
         }
-        return samWorker;
+        return worker;
     }
 
-    function getEspeakWorker() {
-        if (espeakWorker) return espeakWorker;
-        try {
-            espeakWorker = new Worker('./js/lib/speakjs/speakWorker.js');
-            espeakWorker.onmessage = function (e) {
-                var data = e.data;
-                var cb = pendingCallbacks[data.id];
-                if (!cb) return;
-                delete pendingCallbacks[data.id];
-                var wavArray = data.wav;
-                if (!wavArray || !wavArray.length) {
-                    cb.handle.cancelled = true;
-                    if (cb.onended) setTimeout(cb.onended, 0);
-                    return;
-                }
-                if (cb.handle.cancelled) return;
-                var bytes = new Uint8Array(wavArray.length);
-                for (var i = 0; i < wavArray.length; i++) {
-                    bytes[i] = wavArray[i] < 0 ? wavArray[i] + 256 : wavArray[i];
-                }
-                var bufCopy = bytes.buffer.slice(0);
-                audioContext.decodeAudioData(bufCopy, function (decoded) {
-                    if (cb.handle.cancelled) return;
-                    playDecoded(decoded, cb.handle, cb.onended, cb.onstart);
-                }, function (err) {
-                    console.error('eSpeak decodeAudioData error:', err);
-                    if (cb.onended) setTimeout(cb.onended, 0);
-                });
-            };
-            espeakWorker.onerror = function (e) {
-                console.error('eSpeak worker error:', e);
-            };
-        } catch (e) {
-            console.error('Could not create eSpeak worker:', e);
-            espeakWorker = null;
-        }
-        return espeakWorker;
-    }
-
-    function cleanInput(text) {
+    function cleanInput(text, args) {
         var input = String(text == null ? '' : text);
         input = input
             .replace(/&lt;/g,   '<')
@@ -84,7 +44,7 @@
             .replace(/&apos;/g, "'")
             .replace(/&nbsp;/g, ' ')
             .replace(/&amp;/g,  '&')
-            .replace(/&#(\d+);/g,           function (_, n) { return String.fromCharCode(parseInt(n, 10)); })
+            .replace(/&#(\d+);/g,      function (_, n) { return String.fromCharCode(parseInt(n, 10)); })
             .replace(/&#x([0-9a-fA-F]+);/g, function (_, n) { return String.fromCharCode(parseInt(n, 16)); });
         input = input.replace(/[^ -~]/g, function (c) {
             var code = c.charCodeAt(0);
@@ -93,35 +53,13 @@
         return input;
     }
 
-    function makeHandle(id) {
-        return {
-            cancelled: false,
-            audioSource: null,
-            stop: function () {
-                this.cancelled = true;
-                if (this.audioSource) {
-                    try { this.audioSource.stop(); } catch (e) {}
-                }
-                delete pendingCallbacks[id];
-            }
-        };
-    }
-
-    function playFloat32(samples, handle, onended, onstart) {
+    function playBuffer(samples, handle, onended, onstart) {
         var source = audioContext.createBufferSource();
         var buffer = audioContext.createBuffer(1, samples.length, 22050);
         buffer.getChannelData(0).set(samples);
-        _startSource(source, buffer, handle, onended, onstart);
-    }
-
-    function playDecoded(decoded, handle, onended, onstart) {
-        var source = audioContext.createBufferSource();
-        _startSource(source, decoded, handle, onended, onstart);
-    }
-
-    function _startSource(source, buffer, handle, onended, onstart) {
         source.buffer = buffer;
         source.connect(audioContext.destination);
+
         handle.audioSource = source;
 
         var ended = false;
@@ -139,10 +77,12 @@
         };
         source.onended = finish;
 
-        var durationMs = Math.ceil((buffer.duration * 1000)) + 50;
+        var durationMs = Math.ceil((samples.length / 22050) * 1000) + 50;
         source._endTimeout = setTimeout(finish, durationMs);
 
-        try { source.start(0); } catch (e) {
+        try {
+            source.start(0);
+        } catch (e) {
             try { source.noteOn(0); } catch (e2) {}
         }
 
@@ -153,7 +93,7 @@
 
     speak.play = function (text, args, onended, onstart) {
         args = args || {};
-        var input = cleanInput(text);
+        var input = cleanInput(text, args);
 
         var phonetic = !!args.phonetic;
         if (input.charAt(0) === '[') {
@@ -161,32 +101,22 @@
             input = input.slice(1);
         }
 
-        var engine = (args.voice === 'espeak') ? 'espeak' : 'sam';
         var id = ++requestCounter;
-        var handle = makeHandle(id);
 
-        if (engine === 'espeak') {
-            var w = getEspeakWorker();
-            if (!w) {
-                if (onended) setTimeout(onended, 0);
-                return handle;
-            }
-            pendingCallbacks[id] = { handle: handle, onended: onended, onstart: onstart };
-            if (onstart) onstart(handle);
-            w.postMessage({
-                id:   id,
-                text: input,
-                args: {
-                    pitch:     Math.round((typeof args.pitch === 'number' ? args.pitch : 64) / 255 * 99),
-                    speed:     Math.round(80 + ((typeof args.speed === 'number' ? args.speed : 72) / 255) * 220),
-                    amplitude: 100,
-                    voice:     'en-us'
+        var handle = {
+            cancelled: false,
+            audioSource: null,
+            stop: function () {
+                this.cancelled = true;
+                if (this.audioSource) {
+                    try { this.audioSource.stop(); } catch (e) {}
                 }
-            });
-            return handle;
-        }
+                delete pendingCallbacks[id];
+            }
+        };
 
-        var w = getSamWorker();
+        var w = getWorker();
+
         if (!w) {
             try {
                 var sam = new window.SamJs({
@@ -199,7 +129,7 @@
                 });
                 var samples = sam.buf32(input);
                 if (samples && samples.length) {
-                    playFloat32(samples, handle, onended, onstart);
+                    playBuffer(samples, handle, onended, onstart);
                 } else {
                     if (onended) setTimeout(onended, 0);
                 }
@@ -211,6 +141,7 @@
         }
 
         pendingCallbacks[id] = { handle: handle, onended: onended, onstart: onstart };
+
         if (onstart) onstart(handle);
 
         w.postMessage({

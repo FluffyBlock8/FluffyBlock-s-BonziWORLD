@@ -30,6 +30,8 @@
                                 "speed": 0,
                                 "mouth": 0,
                                 "throat": 0,
+                                "voice": 0,
+                                "singmode": 0,
                                 "pawn": 0,
                                 "bees": 0,
                                 "vaporwave": 0,
@@ -93,6 +95,8 @@
                                 "speed": 0,
                                 "mouth": 0,
                                 "throat": 0,
+                                "voice": 0,
+                                "singmode": 0,
                                 "pawn": 0,
                                 "bees": 0,
                                 "vaporwave": 0,
@@ -238,7 +242,7 @@
                 "rayman"
         ],
         "banLength": 1440,
-        "port": 80,
+        "port": 5000,
         "express": {
                 "serveStatic": true
         }
