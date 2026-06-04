@@ -239,7 +239,8 @@
                 "sprint",
                 "fluffyblock",
                 "maxalert",
-                "rayman"
+                "rayman",
+                "oioioi_bw"
         ],
         "banLength": 1440,
         "port": 5000,
