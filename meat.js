@@ -358,6 +358,7 @@ let userCommands = {
         });
     },
     "triggered": "passthrough",
+	"france": "passthrough",
     "vaporwave": function() {
         this.socket.emit("vaporwave");
         this.room.emit("youtube", {
