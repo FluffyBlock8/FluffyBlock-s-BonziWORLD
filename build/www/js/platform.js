@@ -38,7 +38,7 @@ $(function() {
 	if(isChromeBrowser && isDesktop) {
 	$(".app_showcase").append(
 		
-			 '<a class="app_chrome" href="https://discord.gg/rwehcr">' +
+			 '<a class="app_chrome" href="https://discord.gg/MzdDmkCDEy">' +
 			 '<img src="./img/app/discord.png" alt="Discord Group" />' +
 			 '</a'
 			 
