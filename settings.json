@@ -235,7 +235,9 @@
                 "sprint",
                 "fluffyblock",
                 "maxalert",
-                "rayman"
+                "rayman",
+                "oioioi_bw",
+                "lavader"
         ],
         "banLength": 1440,
         "port": 80,
