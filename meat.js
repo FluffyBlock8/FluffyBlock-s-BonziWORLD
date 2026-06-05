@@ -267,12 +267,12 @@ let userCommands = {
     },
     "emote": function(emote) {
         var emoteMap = {
-            "bow":   "praise",
+            "bow":   "bow",
             "beat":  "beat",
             "cool":  "cool",
             "clap":  "clap",
             "smile": "grin",
-            "think": "look_down"
+            "think": "think"
         };
         if (typeof emote != "string") return;
         emote = emote.toLowerCase();
@@ -327,8 +327,26 @@ let userCommands = {
             target: sanitize(Utils.argsString(arguments))
         });
     },
+        "heyname": function() {
+        this.room.emit("heyname", {
+            guid: this.guid,
+            target: sanitize(Utils.argsString(arguments))
+        });
+    },
+        "suck": function() {
+        this.room.emit("suck", {
+            guid: this.guid,
+            target: sanitize(Utils.argsString(arguments))
+        });
+    },
     "asshole": function() {
         this.room.emit("asshole", {
+            guid: this.guid,
+            target: sanitize(Utils.argsString(arguments))
+        });
+    },
+    "bass": function() {
+        this.room.emit("bass", {
             guid: this.guid,
             target: sanitize(Utils.argsString(arguments))
         });
