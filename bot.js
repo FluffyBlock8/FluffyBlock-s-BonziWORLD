@@ -46,7 +46,7 @@ var cool = false;
 var sockets = []
 var commands = {
     help:function(){
-        return "<h2>+help, a fork of b!help.</h2><h3>Commands:</h3>+help, +echo [text], +join [user], +burn, +drunk [text], +clickbait [text], +speed [number], +pitch [number], +mouth [number], +throat [number], +joke, +fact, +triggered, +linux, +pawn, +bees, +name [NEWNAME], +resetname, +color [colors], +color2, +stinky [NAME], +mock [text], +youtube [URL], +weather [LOCATION], +roominfo, +tts [TEXT], +image [URL], +video [URL] (More Commands Coming Soon!)"
+        return "<h2>+help, a fork of b!help.</h2><h3>Commands:</h3>+help, +echo [text], +join [user], +burn, +drunk [text], +clickbait [text], +speed [number], +pitch [number], +mouth [number], +throat [number], +joke, +fact, +triggered, +linux, +pawn, +bees, +name [NEWNAME], +resetname, +color [colors], +color2, +stinky [NAME], +mock [text], +youtube [URL], +weather [LOCATION], +roominfo, +tts [TEXT], +image [URL], +video [URL], +suck [NAME], +hey [NAME], +voice [VOICE], +france (More Commands Coming Soon!)"
     },
     echo(txt){
         if(txt.startsWith('+')){
@@ -122,20 +122,20 @@ var commands = {
         throat(txt){
         bot.emit("command", {list:["throat",txt]})
     },
-            joke(txt){
-        bot.emit("command", {list:["joke",txt]})
+            joke(){
+        bot.emit("command", {list:["joke"]})
     },
-            fact(txt){
-        bot.emit("command", {list:["fact",txt]})
+            fact(){
+        bot.emit("command", {list:["fact"]})
     },
-            triggered(txt){
-        bot.emit("command", {list:["triggered",txt]})
+            triggered(){
+        bot.emit("command", {list:["triggered"]})
     },
-            linux(txt){
-        bot.emit("command", {list:["linux",txt]})
+            linux(){
+        bot.emit("command", {list:["linux"]})
     },
-            pawn(txt){
-        bot.emit("command", {list:["pawn",txt]})
+            pawn(){
+        bot.emit("command", {list:["pawn"]})
     },
                 name(txt){
         bot.emit("command", {list:["name",txt]})
@@ -146,14 +146,26 @@ var commands = {
                     video(txt){
         bot.emit("command", {list:["video",txt]})
     },
-                        bees(txt){
-        bot.emit("command", {list:["bees",txt]})
+                        bees(){
+        bot.emit("command", {list:["bees"]})
+    },
+                            suck(txt){
+        bot.emit("command", {list:["suck",txt]})
+    },
+                hey(txt){
+        bot.emit("command", {list:["heyname",txt]})
     },
                     resetname(txt){
         bot.emit("command", {list:["name","BlocksChat.in (+help)"]})
     },
+                france(){
+        bot.emit("command", {list:["france"]})
+    },
     color2(txt){
         bot.emit("command", {list:["color"]})
+    },
+            voice(txt){
+        bot.emit("command", {list:["voice",txt]})
     },
     weather(txt){
         const location = txt;
